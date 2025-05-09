@@ -1,17 +1,28 @@
 
-import { useEffect, useState } from "react";
-
 export default function App() {
   const [nav, setNav] = useState("Loading...");
   const contractAddress = "0xYourDeployedContractAddressHere";
 
+import { useEffect, useState } from "react";
+
+export default function App() {
+  const [nav, setNav] = useState("Loading...");
+  const contractAddress = "0xYourDeployedContractAddressHere"; // <- Update with your real address
+
   useEffect(() => {
     const fetchNAV = async () => {
-      await new Promise((r) => setTimeout(r, 500));
-      setNav("$100.00");
+      try {
+        const res = await fetch("https://portfoliocoin-nav-backend.onrender.com/nav");
+        const data = await res.json();
+        setNav(data.nav);
+      } catch (err) {
+        console.error("Failed to fetch NAV:", err);
+        setNav("Unavailable");
+      }
     };
     fetchNAV();
   }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 p-6">
