@@ -1,29 +1,30 @@
+import { useEffect, useState } from "react";
 
 export default function App() {
   const [nav, setNav] = useState("Loading...");
   const contractAddress = "0xYourDeployedContractAddressHere";
 
-import { useEffect, useState } from "react";
+  useEffect(() => {
+    const fetchNAV = async () => {
+      try {
+        const res = await fetch("https://portfoliocoin-nav-backend.onrender.com/nav", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          mode: "cors"
+        });
 
-export default function App() {
-  const [nav, setNav] = useState("Loading...");
-  const contractAddress = "0xYourDeployedContractAddressHere"; // <- Update with your real address
+        const data = await res.json();
+        setNav(data.nav);
+      } catch (err) {
+        console.error("Failed to fetch NAV:", err);
+        setNav("Unavailable");
+      }
+    };
 
- useEffect(() => {
-  const fetchNAV = async () => {
-    try {
-      const res = await fetch("https://portfoliocoin-nav-backend.onrender.com/nav");
-      const data = await res.json();
-      setNav(data.nav);
-    } catch (err) {
-      console.error("Failed to fetch NAV:", err);
-      setNav("Unavailable");
-    }
-  };
-  fetchNAV();
-}, []);
-
-
+    fetchNAV();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800 p-6">
@@ -65,3 +66,4 @@ export default function App() {
     </div>
   );
 }
+
