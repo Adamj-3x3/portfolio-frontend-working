@@ -2,28 +2,37 @@ import { useEffect, useState } from "react";
 
 export default function App() {
   const [nav, setNav] = useState("Loading...");
-  const contractAddress = "0xYourDeployedContractAddressHere";
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const contractAddress = "0xb1faa7Ec27010f3fAe56842D76A24D319f58A24f";
+
+  const fetchNAV = async () => {
+    try {
+      const res = await fetch("https://portfoliocoin-nav-backend.onrender.com/nav", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        mode: "cors"
+      });
+
+      const data = await res.json();
+      setNav(data.nav);
+      setLastUpdated(new Date().toLocaleString());
+    } catch (err) {
+      console.error("Failed to fetch NAV:", err);
+      setNav("Unavailable");
+      setLastUpdated(null);
+    }
+  };
 
   useEffect(() => {
-    const fetchNAV = async () => {
-      try {
-        const res = await fetch("https://portfoliocoin-nav-backend.onrender.com/nav", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          mode: "cors"
-        });
+    fetchNAV(); // Run once on page load
 
-        const data = await res.json();
-        setNav(data.nav);
-      } catch (err) {
-        console.error("Failed to fetch NAV:", err);
-        setNav("Unavailable");
-      }
-    };
+    const interval = setInterval(() => {
+      fetchNAV(); // Auto-refresh every hour (3600000 ms)
+    }, 3600000);
 
-    fetchNAV();
+    return () => clearInterval(interval); // Clean up on unmount
   }, []);
 
   return (
@@ -37,6 +46,9 @@ export default function App() {
         <div className="bg-white p-4 rounded-2xl shadow-xl border border-blue-200 mb-6">
           <h2 className="text-xl font-semibold mb-2">Live NAV</h2>
           <p className="text-2xl text-blue-500">{nav}</p>
+          {lastUpdated && (
+            <p className="text-sm text-gray-500 mt-1">Last updated: {lastUpdated}</p>
+          )}
         </div>
 
         <div className="bg-white p-4 rounded-2xl shadow mb-6">
